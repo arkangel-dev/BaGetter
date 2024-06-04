@@ -57,6 +57,7 @@ public class PackageDatabase : IPackageDatabase
             .Include(p => p.Dependencies)
             .Include(p => p.PackageTypes)
             .Include(p => p.TargetFrameworks)
+            .Include(p => p.Owner)
             .Where(p => p.Id == id);
 
         if (!includeUnlisted)

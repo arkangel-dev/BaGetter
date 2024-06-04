@@ -11,6 +11,8 @@ public interface IContext
 
     DbSet<Package> Packages { get; set; }
 
+    DbSet<User> Users { get; set; }
+
     /// <summary>
     /// Check whether a <see cref="DbUpdateException"/> is due to a SQL unique constraint violation.
     /// </summary>

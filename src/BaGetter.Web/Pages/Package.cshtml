@@ -263,6 +263,8 @@ else
                 </div>
             }
 
+         
+
             @if (Model.Package.Tags.Any())
             {
                 <div>
@@ -274,6 +276,13 @@ else
                             <span class="tag">@tag</span>
                         }
                     </p>
+                </div>
+            }
+
+               @if (Model.Package.Owner is not null) {
+                 <div>
+                    <h2>Owner</h2>
+                    <p>@Model.Package.Owner.Username</p>
                 </div>
             }
         </aside>

@@ -10,7 +10,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using HealthCheckOptions = Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions;
-
+using BaGetter.Core.Authentication;
+using Microsoft.AspNetCore.Http.Json;
+using System.Text.Json;
 namespace BaGetter;
 
 public class Startup
@@ -40,9 +42,14 @@ public class Startup
         services.AddTransient(DependencyInjectionExtensions.GetServiceFromProviders<ISearchIndexer>);
 
         services.AddSingleton<IConfigureOptions<MvcRazorRuntimeCompilationOptions>, ConfigureRazorRuntimeCompilation>();
+        services.AddControllers()
+            .AddJsonOptions((j) =>
+            {
+                j.JsonSerializerOptions.WriteIndented = true;
 
+            });
         services.AddHealthChecks();
-
+        services.AddUserManagement();
         services.AddCors();
     }
 

@@ -45,6 +45,14 @@ public abstract class AbstractContext<TContext> : DbContext, IContext where TCon
         builder.Entity<PackageDependency>(BuildPackageDependencyEntity);
         builder.Entity<PackageType>(BuildPackageTypeEntity);
         builder.Entity<TargetFramework>(BuildTargetFrameworkEntity);
+        builder.Entity<User>(BuildUserEntity);
+    }
+
+    public void BuildUserEntity(EntityTypeBuilder<User> package)
+    {
+        package.HasKey(p => p.Key);
+        package.HasIndex(p => p.Username)
+            .IsUnique();
     }
 
     private void BuildPackageEntity(EntityTypeBuilder<Package> package)

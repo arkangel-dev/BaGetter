@@ -14,6 +14,8 @@ public class NullContext : IContext
 
     public bool SupportsLimitInSubqueries => throw new NotImplementedException();
 
+    public DbSet<User> Users { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
     public bool IsUniqueConstraintViolationException(DbUpdateException exception)
     {
         throw new NotImplementedException();
