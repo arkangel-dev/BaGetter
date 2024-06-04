@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using NuGet.Versioning;
 
 namespace BaGetter.Core;
@@ -61,7 +62,8 @@ public class Package
     public List<PackageDependency> Dependencies { get; set; }
     public List<PackageType> PackageTypes { get; set; }
     public List<TargetFramework> TargetFrameworks { get; set; }
-    public User? Owner { get; set; }
+
+    public User Owner { get; set; }
 
     public string NormalizedVersionString { get; set; }
     public string OriginalVersionString { get; set; }

@@ -1,8 +1,9 @@
 using BaGetter.Core;
-using BaGetter.Core.Authentication;
 using BaGetter.Web.DtoModels.AuthenticationModels;
+using BaGetter.Web.DtoModels.PackageModels;
 using BaGetter.Web.DtoModels.StandardModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,19 +14,16 @@ namespace BaGetter.Web.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IContext _dbcontext;
-    private readonly IUserManagementService _userManagementService;
     private readonly IAuthenticationService _authenticationService;
     public AuthenticationController(
-        IUserManagementService userManagementService,
         IAuthenticationService authenticationService,
         IContext dbcontext)
     {
-        _userManagementService = userManagementService;
         _authenticationService = authenticationService;
         _dbcontext = dbcontext;
     }
 
-    [HttpGet("VerifyToken")]
+    [HttpPost("Users/VerifyToken")]
     public IActionResult VerifyToken(
         [FromBody]
         VerifyTokenReqModel payload)
@@ -40,11 +38,10 @@ public class AuthenticationController : ControllerBase
         return Ok(new StatusMessageModel("Token and username is valid"));
     }
 
-    [HttpGet("AddNewUser")]
+    [HttpPut("Users")]
     public async Task<IActionResult> AddNewUser(
         [FromBody]
         AddNewUserReqModel payload,
-
         CancellationToken cancellationToken)
     {
         var existingUser = _dbcontext.Users.SingleOrDefault(x => x.Username == payload.Username);
@@ -59,6 +56,7 @@ public class AuthenticationController : ControllerBase
         {
             Token = Helper.SecurityHelper.GenerateToken(),
             Username = payload.Username,
+            IsAdmin = payload.IsAdmin,
         };
         _dbcontext.Users.Add(newUser);
         await _dbcontext.SaveChangesAsync(cancellationToken);
@@ -67,6 +65,53 @@ public class AuthenticationController : ControllerBase
         {
             Token = newUser.Token,
             Username = newUser.Username,
+        });
+    }
+
+    [HttpGet("Users")]
+    public async Task<IActionResult> ListAllUsers(CancellationToken cancellationToken)
+    {
+
+        return Ok(_dbcontext.Users.Select(x => new UserModel()
+        {
+            IsAdmin = x.IsAdmin,
+            Username = x.Username,
+            Packages = x.Packages.Select(x => x.Title + ":" + x.OriginalVersionString).ToArray()
+        }));
+    }
+
+    [HttpPatch("Packages/Ownership")]
+    public async Task<IActionResult> ChangeOwnership(
+        [FromBody]
+        ReassignPackageRequestModel request,
+        CancellationToken cancellationToken)
+    {
+        var newOwner = _dbcontext.Users.SingleOrDefault(x => x.Username == request.Assignee);
+        if (newOwner is null && request.Assignee is not null)
+            return NotFound(new StatusMessageModel($"The user '{request.Assignee}' was not found"));
+        
+        var packages = _dbcontext.Packages
+            .Where(x => x.Id == request.PackageId)
+            .Include(x => x.Owner)
+            .AsQueryable();
+        if (request.Versions is not null)
+            packages = packages.Where(x => request.Versions.Contains(x.NormalizedVersionString));
+
+       
+
+        var finalPackages = packages.ToList();
+        foreach (var package in finalPackages)
+        {
+            package.Owner = newOwner;
+        }
+
+        await _dbcontext.SaveChangesAsync(cancellationToken);
+
+        return Ok(new ReassignPackageResponseModel()
+        {
+            Assignee = request.Assignee,
+            PackageId = request.PackageId,
+            ReassignedCount = packages.Count()
         });
     }
 }

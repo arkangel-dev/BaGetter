@@ -34,3 +34,10 @@ public class AddNewUserRespModel
     [JsonPropertyName("token")]
     public string Token { get; set; }
 }
+
+public class UserModel
+{
+    public string Username { get; set; }
+    public bool IsAdmin { get; set; }
+    public string[] Packages { get; set; }
+}

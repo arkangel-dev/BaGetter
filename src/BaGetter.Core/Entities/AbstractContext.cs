@@ -53,6 +53,12 @@ public abstract class AbstractContext<TContext> : DbContext, IContext where TCon
         package.HasKey(p => p.Key);
         package.HasIndex(p => p.Username)
             .IsUnique();
+        
+
+        package.HasMany(x => x.Packages)
+            .WithOne(x => x.Owner)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 
     private void BuildPackageEntity(EntityTypeBuilder<Package> package)

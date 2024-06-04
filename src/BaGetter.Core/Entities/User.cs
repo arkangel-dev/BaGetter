@@ -12,4 +12,5 @@ public class User
     public string Username { get; set; }
     public string Token { get; set; }
     public bool IsAdmin { get; set; }
+    public List<Package> Packages { get; set; } = new List<Package>(); 
 }

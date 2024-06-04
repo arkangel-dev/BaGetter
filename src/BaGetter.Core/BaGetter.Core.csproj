@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    
     <ProjectReference Include="..\BaGetter.Protocol\BaGetter.Protocol.csproj" />
   </ItemGroup>
 
