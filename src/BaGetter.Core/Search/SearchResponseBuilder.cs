@@ -22,7 +22,8 @@ public class SearchResponseBuilder : ISearchResponseBuilder
 
         foreach (var packageRegistration in packageRegistrations)
         {
-            var versions = packageRegistration.Packages.OrderByDescending(p => p.Version).ToList();
+            var versions = packageRegistration.Packages.OrderByDescending(p => p.Version)
+                .ToList();
             var latest = versions.First();
             var iconUrl = latest.HasEmbeddedIcon
                 ? _url.GetPackageIconDownloadUrl(latest.Id, latest.Version)
@@ -42,6 +43,7 @@ public class SearchResponseBuilder : ISearchResponseBuilder
                 Tags = latest.Tags,
                 Title = latest.Title,
                 TotalDownloads = versions.Sum(p => p.Downloads),
+                Owner = latest.Owner?.Username,
                 Versions = versions
                     .Select(p => new SearchResultVersion
                     {

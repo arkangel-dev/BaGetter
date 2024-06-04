@@ -1,6 +1,6 @@
 using BaGetter.Core;
-using BaGetter.Web.DtoModels.AuthenticationModels;
-using BaGetter.Web.DtoModels.PackageModels;
+using BaGetter.Web.DtoModels.UserManagementModels;
+using BaGetter.Web.DtoModels.PackageManagementModels;
 using BaGetter.Web.DtoModels.StandardModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 namespace BaGetter.Web.Controllers;
 
 [Route("[controller]")]
-public class AuthenticationController : ControllerBase
+public class AdminController : ControllerBase
 {
     private readonly IContext _dbcontext;
     private readonly IAuthenticationService _authenticationService;
-    public AuthenticationController(
+    public AdminController(
         IAuthenticationService authenticationService,
         IContext dbcontext)
     {
@@ -78,6 +78,21 @@ public class AuthenticationController : ControllerBase
             Username = x.Username,
             Packages = x.Packages.Select(x => x.Title + ":" + x.OriginalVersionString).ToArray()
         }));
+    }
+
+    [HttpDelete("Users")]
+    public async Task<IActionResult> DeleteUser(
+        [FromBody]
+        UserDeleteReqModel request,
+        CancellationToken cancellationToken) {
+
+        var user = _dbcontext.Users.SingleOrDefault(x => x.Username == request.Username);
+        if (user is null)
+            return NotFound(new StatusMessageModel($"The user {request.Username} was not found"));
+
+        _dbcontext.Users.Remove(user);
+        await _dbcontext.SaveChangesAsync(cancellationToken);
+        return Ok(new StatusMessageModel("User has been deleted successfully"));
     }
 
     [HttpPatch("Packages/Ownership")]

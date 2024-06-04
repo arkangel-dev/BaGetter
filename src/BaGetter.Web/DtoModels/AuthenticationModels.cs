@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace BaGetter.Web.DtoModels.AuthenticationModels;
+namespace BaGetter.Web.DtoModels.UserManagementModels;
 
 public class VerifyTokenReqModel
 {
@@ -40,4 +41,10 @@ public class UserModel
     public string Username { get; set; }
     public bool IsAdmin { get; set; }
     public string[] Packages { get; set; }
+}
+
+public class UserDeleteReqModel
+{
+    [MinLength(1)]
+    public string Username { get; set; }
 }

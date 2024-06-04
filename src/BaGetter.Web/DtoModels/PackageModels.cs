@@ -6,14 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaGetter.Web.DtoModels.PackageModels;
+namespace BaGetter.Web.DtoModels.PackageManagementModels;
 public class ReassignPackageRequestModel
 {
     [Required]
-    [StringLength(1)]
+    [MinLength(1)]
     public string PackageId { get; set; }
 
-    [StringLength(1)]
+    [MinLength(1)]
     [MaybeNull]
     public string Assignee { get; set; }
 

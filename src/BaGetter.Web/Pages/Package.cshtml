@@ -230,6 +230,13 @@ else
                             <a href="@Model.LicenseUrl">License</a>
                         </li>
                     }
+                       @if (Model.Package.Owner != null)
+                    {
+                        <li>
+                            <i class="ms-Icon ms-Icon--UserFollowed"></i>
+                            @Model.Package.Owner.Username
+                        </li>
+                    }
 
                     <li>
                         <i class="ms-Icon ms-Icon--CloudDownload"></i>
@@ -279,12 +286,7 @@ else
                 </div>
             }
 
-               @if (Model.Package.Owner is not null) {
-                 <div>
-                    <h2>Owner</h2>
-                    <p>@Model.Package.Owner.Username</p>
-                </div>
-            }
+         
         </aside>
     </div>
 }

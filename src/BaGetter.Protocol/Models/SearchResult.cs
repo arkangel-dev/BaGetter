@@ -85,6 +85,9 @@ public class SearchResult
     [JsonPropertyName("title")]
     public string Title { get; set; }
 
+    [JsonPropertyName("owner")]
+    public string? Owner { get; set; }
+
     /// <summary>
     /// The total downloads for all versions of the matched package.
     /// </summary>

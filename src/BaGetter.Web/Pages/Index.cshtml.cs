@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
@@ -56,6 +56,7 @@ public class IndexModel : PageModel
                 PackageType = packageType,
                 Framework = framework,
                 Query = Query,
+                
             },
             cancellationToken);
 

@@ -133,6 +133,15 @@ else
                             Latest version: @package.Version
                         </span>
                     </li>
+                    @if (package.Owner is not null)
+                    {
+                        <li>
+                            <span>
+                                <i class="ms-Icon ms-Icon--UserFollowed"></i>
+                            @package.Owner
+                        </span>
+                    </li>
+                    }
                     @if (package.Tags.Any())
                     {
                         <li>
