@@ -29,7 +29,7 @@ public abstract class AbstractContext<TContext> : DbContext, IContext where TCon
     public DbSet<PackageDependency> PackageDependencies { get; set; }
     public DbSet<PackageType> PackageTypes { get; set; }
     public DbSet<TargetFramework> TargetFrameworks { get; set; }
-
+    public DbSet<User> Users { get; set; }
     public Task<int> SaveChangesAsync() => SaveChangesAsync(default);
 
     public virtual async Task RunMigrationsAsync(CancellationToken cancellationToken)
