@@ -7,9 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using BaGetter.Web.Authorization;
 
 namespace BaGetter.Web.Controllers;
 
+[Authorize(Roles = "Admin")]
 [Route("[controller]")]
 public class AdminController : ControllerBase
 {

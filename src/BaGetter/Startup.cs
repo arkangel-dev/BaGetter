@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using HealthCheckOptions = Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions;
 using Microsoft.AspNetCore.Http.Json;
 using System.Text.Json;
+using BaGetter.Web.Authorization;
 namespace BaGetter;
 
 public class Startup
@@ -48,6 +49,7 @@ public class Startup
 
             });
         services.AddHealthChecks();
+        services.AddBagetAuthorization();
         services.AddCors();
     }
 
@@ -88,9 +90,10 @@ public class Startup
         app.UseStaticFiles();
         app.UseRouting();
 
+        app.AddBagetAuthentication();
+
         app.UseCors(ConfigureBaGetterServer.CorsPolicy);
         app.UseOperationCancelledMiddleware();
-
         app.UseEndpoints(endpoints =>
         {
             var baget = new BaGetterEndpointBuilder();
