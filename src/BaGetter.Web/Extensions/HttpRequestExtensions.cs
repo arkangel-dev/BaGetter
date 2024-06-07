@@ -36,7 +36,7 @@ public static class HttpRequestExtensions
         }
     }
 
-    public static string GetApiKey(this HttpRequest request)
+    public static string? GetApiKey(this HttpRequest request)
     {
         return request.Headers[ApiKeyHeader];
     }

@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Bson;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
@@ -14,42 +17,73 @@ namespace BaGetter.Web.Authorization;
 public class CustomTokenAuthenticationHandler : AuthenticationHandler<CustomTokenAuthenticationOptions>
 {
 
-    private IContext _context { get; set; }
+    private readonly IContext _context;
+    private readonly IOptionsSnapshot<BaGetterOptions> _options;
 
     public CustomTokenAuthenticationHandler(
         IContext context,
         IOptionsMonitor<CustomTokenAuthenticationOptions> options,
         ILoggerFactory logger,
+        IOptionsSnapshot<BaGetterOptions> confOptions,
         UrlEncoder encoder)
         : base(options, logger, encoder)
     {
+
+        _options = confOptions ?? throw new ArgumentNullException(nameof(confOptions));
         _context = context;
+    }
+
+    private string username = string.Empty;
+    private bool isDefaultAdmin = false;
+    private bool isAdmin = false;
+    private bool isFound = false;
+
+    private void CheckData()
+    {
+        var token = Request.GetApiKey();
+        var userInst = _context.Users.SingleOrDefault(x => x.Token == token);
+        if (userInst is not null)
+        {
+            username = userInst.Username;
+            isAdmin = userInst.IsAdmin;
+            isFound = true;
+            return;
+        }
+
+        var confToken = _options.Value.ApiKey;
+        if (token == null && string.IsNullOrWhiteSpace(confToken))
+        {
+            username = "Default";
+            isDefaultAdmin = true;
+            isAdmin = true;
+            isFound = true;
+            return;
+        }
+
+        if (token == confToken)
+        {
+            username = "Default";
+            isDefaultAdmin = true;
+            isAdmin = true;
+            isFound = true;
+            return;
+        }
     }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        // Your custom authentication logic here
-        var authHeader = Request.Headers["Authorization"].ToString();
+        CheckData();
+        if (!isFound)
+            return Task.FromResult(AuthenticateResult.Fail("Failed to Auth"));
 
-        //if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Custom ", System.StringComparison.OrdinalIgnoreCase))
-        //{
-        //    return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Header"));
-        //}
-
-        //var token = authHeader.Substring("Custom ".Length).Trim();
-
-        //// Validate the token (this is just an example, replace with your actual logic)
-        //if (token != "valid-token")
-        //{
-        //    return Task.FromResult(AuthenticateResult.Fail("Invalid Token"));
-        //}
-
-        var claims = new[] {
-            new Claim(ClaimTypes.NameIdentifier, "user-id"),
-            new Claim(ClaimTypes.Name, "username"),
-            new Claim(ClaimTypes.Role, "Admin")
-            // Add other claims as needed
+        var claims = new List<Claim>() {
+            new Claim(ClaimTypes.NameIdentifier, username),
         };
+        if (isAdmin)
+            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+
+        if (isDefaultAdmin)
+            claims.Add(new Claim(ClaimTypes.Role, "DefaultAdmin"));
 
         var identity = new ClaimsIdentity(claims, Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
