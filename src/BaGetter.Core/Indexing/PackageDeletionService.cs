@@ -13,18 +13,24 @@ public class PackageDeletionService : IPackageDeletionService
     private readonly IPackageStorageService _storage;
     private readonly BaGetterOptions _options;
     private readonly ILogger<PackageDeletionService> _logger;
+    private readonly IAuthenticationService _authenticationService;
 
     public PackageDeletionService(
         IPackageDatabase packages,
         IPackageStorageService storage,
         IOptionsSnapshot<BaGetterOptions> options,
-        ILogger<PackageDeletionService> logger)
+        ILogger<PackageDeletionService> logger,
+        IAuthenticationService authenticationService)
     {
         _packages = packages ?? throw new ArgumentNullException(nameof(packages));
         _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _authenticationService = authenticationService ?? throw new ArgumentNullException(nameof(logger));
     }
+
+
+
 
     public async Task<bool> TryDeletePackageAsync(string id, NuGetVersion version, CancellationToken cancellationToken)
     {

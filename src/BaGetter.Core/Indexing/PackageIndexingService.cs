@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -16,14 +17,15 @@ public class PackageIndexingService : IPackageIndexingService
     private readonly SystemTime _time;
     private readonly IOptionsSnapshot<BaGetterOptions> _options;
     private readonly ILogger<PackageIndexingService> _logger;
-
+    private readonly IAuthenticationService _authentication;
     public PackageIndexingService(
         IPackageDatabase packages,
         IPackageStorageService storage,
         ISearchIndexer search,
         SystemTime time,
         IOptionsSnapshot<BaGetterOptions> options,
-        ILogger<PackageIndexingService> logger)
+        ILogger<PackageIndexingService> logger,
+        IAuthenticationService authentication)
     {
         _packages = packages ?? throw new ArgumentNullException(nameof(packages));
         _storage = storage ?? throw new ArgumentNullException(nameof(storage));
@@ -31,6 +33,20 @@ public class PackageIndexingService : IPackageIndexingService
         _time = time ?? throw new ArgumentNullException(nameof(time));
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _authentication = authentication ?? throw new ArgumentNullException(nameof(authentication));
+    }
+
+    public async Task<PackageIndexingResult> IndexAsync(string apiKey, Stream packageStream, CancellationToken cancellationToken)
+    {
+        using var packageReader = new PackageArchiveReader(packageStream, leaveStreamOpen: true);
+        var package = packageReader.GetPackageMetadata();
+        package.Published = _time.UtcNow;
+
+        var packageName = packageReader.GetPackageMetadata().Id;
+        if (!await _authentication.AuthenticateAsync(apiKey, packageName, cancellationToken))
+            return PackageIndexingResult.NotTheOwner;
+
+        return await IndexAsync(packageStream, cancellationToken);
     }
 
     public async Task<PackageIndexingResult> IndexAsync(Stream packageStream, CancellationToken cancellationToken)

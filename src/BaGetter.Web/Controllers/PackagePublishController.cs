@@ -5,6 +5,7 @@ using BaGetter.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NuGet.Packaging;
 using NuGet.Versioning;
 
 namespace BaGetter.Web;
@@ -37,12 +38,15 @@ public class PackagePublishController : Controller
     // See: https://docs.microsoft.com/en-us/nuget/api/package-publish-resource#push-a-package
     public async Task Upload(CancellationToken cancellationToken)
     {
+        var apiKey = Request.GetApiKey();
         if (_options.Value.IsReadOnlyMode ||
-            !await _authentication.AuthenticateAsync(Request.GetApiKey(), cancellationToken))
+            !await _authentication.AuthenticateAsync(apiKey, cancellationToken))
         {
             HttpContext.Response.StatusCode = 401;
             return;
         }
+
+
 
         try
         {
@@ -53,8 +57,7 @@ public class PackagePublishController : Controller
                 return;
             }
 
-            var result = await _indexer.IndexAsync(uploadStream, cancellationToken);
-
+            var result = await _indexer.IndexAsync(apiKey, uploadStream, cancellationToken);
             switch (result)
             {
                 case PackageIndexingResult.InvalidPackage:
@@ -67,6 +70,10 @@ public class PackagePublishController : Controller
 
                 case PackageIndexingResult.Success:
                     HttpContext.Response.StatusCode = 201;
+                    break;
+
+                case PackageIndexingResult.NotTheOwner:
+                    HttpContext.Response.StatusCode = 401;
                     break;
             }
         }
@@ -91,7 +98,7 @@ public class PackagePublishController : Controller
             return NotFound();
         }
 
-        if (!await _authentication.AuthenticateAsync(Request.GetApiKey(), cancellationToken))
+        if (!await _authentication.AuthenticateAsync(Request.GetApiKey(), id, cancellationToken))
         {
             return Unauthorized();
         }

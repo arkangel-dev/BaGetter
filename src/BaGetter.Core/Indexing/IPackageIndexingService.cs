@@ -11,6 +11,11 @@ namespace BaGetter.Core;
 public enum PackageIndexingResult
 {
     /// <summary>
+    /// You are not the owner, therefore you aren't allowed to write to it
+    /// </summary>
+    NotTheOwner,
+
+    /// <summary>
     /// The package is malformed. This may also happen if BaGetter is in a corrupted state.
     /// </summary>
     InvalidPackage,
@@ -37,5 +42,8 @@ public interface IPackageIndexingService
     /// <param name="stream">The stream containing the package's content.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>The result of the attempted indexing operation.</returns>
+    Task<PackageIndexingResult> IndexAsync(string apiKey, Stream stream, CancellationToken cancellationToken);
+
+
     Task<PackageIndexingResult> IndexAsync(Stream stream, CancellationToken cancellationToken);
 }
